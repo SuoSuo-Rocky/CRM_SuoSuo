@@ -1,0 +1,28 @@
+{% extends 'kingadmin/index.html' %}
+<!-- # 从 配置文件中 读取路径  -->
+{% load kingadmin_tags %}
+
+{% block css %}
+
+{% endblock %}
+{% block right-content-container %}
+      <h2 class="page-header">{{ model_name |upper}}</h2>
+
+{% if objs %}
+        {% for row_obj in objs %}
+            {% display_all_realted_obj row_obj as  display_all_realted_obj  %}
+        {% endfor %}
+    {% else %}
+        {% display_all_realted_obj row_obj as  display_all_realted_obj  %}
+{% endif %}]
+             {{ display_all_realted_obj | safe}}
+
+
+
+
+{#        <h3 class="page-header alert-danger">注意:以下与{{ row_obj }}相关联的数据都将被删除!</h3>#}
+
+
+
+
+{% endblock %}

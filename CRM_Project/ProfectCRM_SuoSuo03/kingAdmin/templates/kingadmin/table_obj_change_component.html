@@ -1,0 +1,135 @@
+{%  load kingadmin_tags %}
+<form class="form-horizontal" method="post" onsubmit="VerificationAddSelected()">
+    {%  csrf_token %}
+    <!--  循环 model_form 对象 生成表单     -->
+        {% for field in form_obj %}
+            <div>
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label">{{ field.label }}</label>
+                    <di class="col-sm-10">
+                        {% if field.name in admin_class.filter_horizontal %}
+                             <!--  M 2 M 字段     左边    的 select 框  为  全部对象 -->
+                                <div class="col-md-5">
+                                    <input type="search" class="form-control" name="select_search" oninput="FuzzSearch(this)">
+{#                                    <button class="btn btn-info ">Search</button>#}
+                                    <select class="form-control" name="{{ field.name }}_old" id="id_{{ field.name }}_from" multiple>
+                        <!--  as  的 高级用法 ，自定义标签返回一个 变量 存储在 get_available_m2m_data 中  -->
+                                    {% get_available_m2m_data field.name admin_class form_obj as get_available_m2m_data %}
+                                        {% for obj in get_available_m2m_data %}
+                                            <option value="{{ obj.id }}" ondblclick="MoveSelectedOption(this, 'id_{{ field.name }}_to')">{{ obj }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <p class="col-md-offset-4"> <a href="#" onclick="MoveAll('id_{{ field.name }}_from', 'id_{{ field.name }}_to')">Choose All</a></p>
+                                </div>
+                             <!--  M 2 M 字段     右边    的 select 框   代表已  选择 的 对象 -->
+                                <div class="col-md-5">
+                                    <select tag="right_select" class="form-control" name="{{ field.name }}" id="id_{{ field.name }}_to" multiple>
+                        <!--  as  的 高级用法 ，自定义标签返回一个 变量 存储在 get_available_m2m_data 中  -->
+                                    {% get_selected_m2m_data field.name admin_class form_obj as get_selected_m2m_data %}
+                                        {% for obj in get_selected_m2m_data %}
+                                            <option value="{{ obj.id }}" ondblclick="MoveSelectedOption(this, 'id_{{ field.name }}_from')">{{ obj }}</option>
+                                        {% endfor %}
+                                    </select>
+                                     <p class="col-md-offset-4"> <a href="#" onclick="MoveAll('id_{{ field.name }}_to', 'id_{{ field.name }}_from')">Remove All</a></p>
+
+                                </div>
+
+                        {% else %}
+                                {{ field }}
+                        {% endif %}
+                                <span style="color: red">{{ field.errors.0  }}</span>
+    {#                  <input type="email" class="form-control" id="inputEmail3" placeholder="Email">#}
+                    </di>
+                </div>
+            </div>
+        {% endfor %}
+
+    <!--  判断 当前是 编辑 还是 新增加  记录 的 状态， 处理 只读 的 字段 ， 编辑 为 False   -->
+        {% if not admin_class.form_add %}
+                {% for field in  admin_class.readonly_fields %}
+                    <div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-2 control-label">{{ field }}</label>
+                            <di class="col-sm-10">
+                                <p>{% get_obj_field_val form_obj field %}</p>
+                            </di>
+                        </div>
+                    </div>
+                {% endfor %}
+        {% endif %}
+
+        <div class="form-group">
+            {% if form_obj.instance.id %}
+                <div class="col-sm-2">
+                  <a href="{% url 'table_obj_delete'  app_name model_name  form_obj.instance.id   %}" class="btn btn-lg btn-danger" type="submit" >Delete</a>
+                </div>
+            {% endif %}
+            <div class="col-sm-offset-8 col-sm-2">
+              <button class="btn btn-lg btn-info" type="submit" >Save</button>
+            </div>
+        </div>
+    </form>
+
+<script>
+    // <!-- select 框中  option 的 双击 事件  -->
+    function MoveSelectedOption(ele,target_id) {
+        <!--  发现 $(ele)[0]  为 双击 的  option 标签   -->
+       {#console.log($(ele)[0]);#}
+
+       {# var  source_ele = $(ele)[0];#}
+       {# var new_target_id = $(ele).parent().attr('id');#}
+       {# if(String(new_target_id)=="id_consult_courses_to"){#}
+       {#     new_target_id = "id_consult_courses_from"#}
+       {# }#}
+       {# else{#}
+       {#     new_target_id = "id_consult_courses_to" #}
+       {# }#}
+       {##}
+       {# console.log(new_target_id);#}
+       {# $(source_ele).attr("ondblclick", "MoveSelectedOption(this," + new_target_id +")");#}
+       {# $("#" + target_id).append(source_ele);#}
+
+        <!--  Teacher -->
+        var new_target_id = $(ele).parent().attr('id');
+        var option = "<option value='" + $(ele).val() +"'ondblclick=MoveSelectedOption(this,'"+ new_target_id +"') >" + $(ele).text() +"</option>";
+        $("#"+ target_id).append(option);
+        $(ele).remove();
+
+    }
+    <!-- 实现 全选  -->
+    function VerificationAddSelected(){
+         $("select[tag] option").prop('selected',true);
+    }
+
+    <!--  实现 select 框的 批量 操作   -->
+    function MoveAll(source_id, target_id){
+        $("#" + source_id).children().each(function () {
+            MoveSelectedOption(this, target_id);
+        })
+    }
+    <!-- select 框的  搜索 事件   -->
+    function FuzzSearch(ele) {
+        // console.log($(ele).val());
+        var search_text = $(ele).val().toUpperCase();
+        $(ele).next().children().each(function () {
+            if ($(this).text().toUpperCase().search(search_text) != -1){
+                $(this).show();
+            }else{
+                $(this).hide();
+            }
+
+        })
+
+    }
+
+</script>
+
+
+
+
+
+
+
+
+
+

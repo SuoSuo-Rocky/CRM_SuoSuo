@@ -1,0 +1,88 @@
+{% extends 'kingadmin/base.html' %}
+
+{% load kingadmin_tags %}
+{% block body %}
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="https://v3.bootcss.com/examples/dashboard/#">
+              {% block pro_name %}
+                     Project name
+              {% endblock %}
+          </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+{#            <li><a href="https://v3.bootcss.com/examples/dashboard/#">Dashboard</a></li>#}
+{#            <li><a href="https://v3.bootcss.com/examples/dashboard/#">Settings</a></li>#}
+{#            <li><a href="https://v3.bootcss.com/examples/dashboard/#">Profile</a></li>#}
+            <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ request.user }}<span class="caret"></span></a>
+                  <ul class="dropdown-menu">
+                        <li><a href="#">个人信息</a></li>
+                        <li><a href="{% url 'logout' %}">Logout</a></li>
+    {#                    <li><a href="#">Something else here</a></li>#}
+    {#                    <li role="separator" class="divider"></li>#}
+    {#                    <li class="dropdown-header">Nav header</li>#}
+    {#                    <li><a href="#">Separated link</a></li>#}
+    {#                    <li><a href="#">One more separated link</a></li>#}
+                  </ul>
+            </li>
+          </ul>
+       <!--    <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Search...">
+          </form> -->
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+      <!-- 生成 动态 首页 左侧 的菜单   -->
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+
+                  {% for role in request.user.role.select_related %}
+                    {% for menu in role.menus.all %}
+                        {% get_path request.path %}
+                         {% if menu.url_type == 0 %}
+                               {% if request.path == menu.url_name %}
+                                    <li class="active"><a href="{{ menu.url_name }}">{{ menu.name }}</a></li>
+                                    {% else %}
+                                    <li ><a href="{{ menu.url_name }}">{{ menu.name }}</a></li>
+                               {% endif %}
+                        {% else %}
+
+                                {% if request.path == menu.url_name %}
+                                    <li class="active"><a href="{% url menu.url_name %}">{{ menu.name }}</a></li>
+                                    {% else %}
+                                    <li ><a href="{% url menu.url_name %}">{{ menu.name }}</a></li>
+                                {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                  {% endfor %}
+
+          </ul>
+
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            {% block right-content-container %}
+                  <h2 class="page-header">Dashboard</h2>
+
+            {% endblock %}
+        </div>
+      </div>
+    </div>
+    <script>
+        function get_user(ele) {
+        console.log('------------------------->',ele);
+
+    }
+    </script>
+{% endblock %}

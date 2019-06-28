@@ -1,0 +1,283 @@
+
+# 林海峰   本项目的 Github 的地址
+https://github.com/triaquae/PerfectCRM
+
+
+一对一: 反向直接小写表名：
+               {{ request.user.userprofile.role.all }}
+              <!-- 上下 完全 一样  -->
+              {{ request.user.userprofile.role.select_related }}
+ FK : 反向 为： 小写表明 + "_set"
+
+ 动态 获取 项目 settings 配置
+ from django import conf
+ print(conf.settings)
+
+# python 优化
+在 Django 的 Django容器中 模块 只 实例化一次，
+    同一模块 第二次 以及 后续 的 导入，会去找第一次 导入的对象
+
+
+# 打开 Django 的 shell 工具
+在 Command lines 中: python3.7  manage.py shell
+
+# 打开 Django 的 内置 Sqlite 当前 项目 生成的 DB;
+在 Command lines 中: python3.7  manage.py dbshell
+
+# 在 Django 的 Shell 工具中:
+dir(models.表名._meta)  # 打印 此 表类 对象 的 全部属性
+其中: models.表名._meta.app_label : 当前 表对象 所在的  app  名 ,        str 型
+      models.表名._meta.model_name:当前 表对象 在 models.py 中的表名，   str 型
+      models.表名._meta.fields : 获取 model 所有 字段对象
+      models.表名._meta.get_fields('status') # 获取一个 字段对象
+
+
+a = models.CustomerInfo.objects.last() #  取 一条记录
+a.getattr(a,'字段名') # 获得 值
+# 对于 字段 为 choices 选项类型 的 字段.
+        例：status_choices = (
+                (0, '未报名'),
+                (1, '已报名'),
+                (2, '已退学'),
+            )
+a.status : 为 选项所代表的 数字
+a.get_status_display()  : 为 选项所代表的 具体的值
+
+
+model.py 中 的类名: model_calss = repository.models.CustomerInfo
+        1、model_class._meta : 获取 元
+
+>>> admin_class = site.enabled_admins["repository"]["customerinfo"]
+>>> admin_class
+<shiwei.kingadmin.CustomerAdmin object at 0x02F13F50>
+>>> model_class = admin_class.model
+>>> field_consultant = model_class._meta.get_field("consultant")
+
+>>> field_consultant.related_model
+<class 'repository.models.UserProfile'>
+
+>>> field_consultant.related_model._meta.model
+<class 'repository.models.UserProfile'>
+>>> field_consultant.related_model._meta.model_name
+'userprofile'
+
+>>> field_consultant.get_internal_type()
+'ForeignKey'
+>>> field_consultant.name
+'consultant'
+>>> field_consultant.model
+<class 'repository.models.CustomerInfo'>
+>>> field_consultant.many_to_one
+True
+
+In [21]: type(CustomerInfo._meta.get_field("status").get_internal_type)
+Out[21]: method
+
+In [22]: type(CustomerInfo._meta.get_field("status").get_internal_type())
+Out[22]: str
+
+In [8]: field_name.primary_key
+Out[8]: False
+
+In [9]: field_id.primary_key
+Out[9]: True
+
+
+
+
+#  DB 中  Q 查询的 使用
+In [27]: from django.db.models  import Q
+In [29]: q = Q()
+In [31]: q.connector
+Out[31]: 'AND'
+In [33]: q.connector = 'OR'
+In [34]: q.connector
+Out[34]: 'OR'
+
+In [35]: q.children.append(("name__contains","shi"))
+In [36]: q
+Out[36]: <Q: (OR: ('name__contains', 'shi'))>
+
+In [37]: q.children.append(("consult_content__contains","How"))
+In [38]: q
+Out[38]: <Q: (OR: ('name__contains', 'shi'), ('consult_content__contains', 'How'))>
+
+In [39]: CustomerInfo.objects.filter(q)
+Out[39]: <QuerySet [<CustomerInfo: 刚娘>, <CustomerInfo: shiwei>]>
+
+前端数据修改的 方式:
+1、form 表单：
+2、Ajax
+
+比较:
+    Ajax 可以 保存 原有的 数据，不会刷新页面，
+        此种方式 后台也应该 做验证。避免 类似 爬虫和脚本的访问， 绕过浏览器
+
+前端验证 和后端验证 的区别:
+    前端验证可以 减少 服务器后台的 压力
+    后端验证 可以保证 数据的 安全
+
+Django 的 ModelForm 是 把 Model 中的 数据 和 Form 中的表单进行了绑定，
+动态的 ModelForm
+
+Django 中 没有 动态 Form 的 概念
+hick : 黑客
+hook : 钩子
+
+
+
+
+
+
+#  ***************           关联删除      * ***************
+
+In [43]: row_obj._meta.fields_map
+Out[43]:
+{'CustomerInfo_consult_courses+': <ManyToOneRel: repository.customerinfo_consult_courses>,
+ 'customerinfo': <ManyToOneRel: repository.customerinfo>,
+ 'student': <ManyToOneRel: repository.student>,
+ 'customerfollowup': <ManyToOneRel: repository.customerfollowup>}
+
+
+In [45]: row_obj._meta.fields_map['student']
+Out[45]: <ManyToOneRel: repository.student>
+
+
+In [47]: row_obj._meta.fields_map['student'].model
+Out[47]: repository.models.CustomerInfo
+
+In [48]: row_obj._meta.fields_map['student'].related_model
+Out[48]: repository.models.Student
+
+In [49]: for i in row_obj._meta.fields_map.values():
+    ...:     print(i.related_model)
+    ...:
+<class 'repository.models.CustomerInfo_consult_courses'>
+<class 'repository.models.CustomerInfo'>
+<class 'repository.models.Student'>
+<class 'repository.models.CustomerFollowUp'>
+
+
+In [60]: row_obj._meta.many_to_many
+Out[60]: (<django.db.models.fields.related.ManyToManyField: consult_courses>)
+
+In [61]: row_obj._meta.local_many_to_many
+Out[61]: [<django.db.models.fields.related.ManyToManyField: consult_courses>]
+
+
+In [62]: row_obj._meta.related_fkey_lookups
+Out[62]: []
+
+In [63]: row_obj._meta.related_objects
+Out[63]:
+(<ManyToOneRel: repository.customerinfo>,
+ <ManyToOneRel: repository.student>,
+ <ManyToOneRel: repository.customerfollowup>)
+
+
+proxy  代理
+agent  代理
+related    有关系的，有关联的；讲述的，叙述的
+
+
+# 反向关联 ，查找出 所有的 关联属性
+In [16]: for i in dir(row_obj):
+    ...:     if str(i).endswith("_set"):
+    ...:         print(i)
+    ...:
+customerfollowup_set
+customerinfo_set
+student_set
+
+#          *************         高级代码    *********************
+In [31]: for i in dir(row_obj):
+    ...:     if str(i).endswith("_set"):
+    ...:        print(i + "-----> ",getattr(row_obj,str(i)).all())
+    ...:
+    ...:
+
+customerfollowup_set----->  <QuerySet [<CustomerFollowUp: 发到额地方的>]>
+customerinfo_set----->  <QuerySet [<CustomerInfo: 刺绣>]>
+student_set----->  <QuerySet [<Student: shiwei>]>
+
+
+
+面包屑导航:
+Django 搜索：
+custom authentication 自定义用户认证
+
+class Meta:
+    abstract = True   > 不创建表， 只把字段传递给 继承 自己的 子类
+
+    md5 不可以反解， 但可以 撞库 破解
+    Django 采用的 是 md5 + 盐
+
+(LDAP)账户管理系统： 轻量级目录账号管理协议， 集中账号管理
+自定义验证方式：
+class MyBackend:
+    def authenticate(self, request, username=None, password=None):
+        # Check the username/password and return a user.
+        ...
+     Single Sign on : 单点登录  SSO
+
+In [14]: u.user.has_perm('repository.add_userprofile')
+Out[14]: True
+
+In [15]: u.user.has_perm('repository.delete_userprofile')
+Out[15]: True
+
+In [16]: u.user.has_perm('repository.change_userprofile')
+Out[16]: False
+
+
+# 权限管理
+from repository.models import *
+alex_obj = UserProfile.objects.filter(id=4)[0]
+alex_obj.has_perm('repository.add_role')
+
+alex_obj.has_perm('repository.kingadmin_backend_page')
+alex_obj.has_perm('repository.kingadmin_table_obj_change')
+
+
+
+url(r'^(?P<app_name>\w+)/(?P<model_name>\w+)/$', views.table_obj_list, name="table_obj_list"),
+
+
+########################### url 的 正向 和 反向  ######################
+resolve : 正向 ， 解析 url
+reverse : 反向 ,  根据 url_name 和 url 参数 和分组  生成  URL
+
+from django.urls import resolve
+res = resolve("/kingadmin/repository/customerinfo/")
+Out[2]: ResolverMatch(
+            func=kingAdmin.permission.inner,
+            args=(),
+            kwargs={'app_name': 'repository', 'model_name': 'customerinfo'},
+            url_name=table_obj_list,
+            app_names=[],
+            namespaces=[]
+        )
+In [3]: res.kwargs
+Out[3]: {'app_name': 'repository', 'model_name': 'customerinfo'}
+
+
+
+from django.urls import reverse  =====  from django.shortcuts import reverse
+In [9]: from django.shortcuts import reverse
+In [10]: out = reverse('table_obj_list',kwargs={'app_name':"repository","model_name":"shiwei"})
+In [11]: out
+Out[11]: '/kingadmin/repository/shiwei/'
+
+
+In [15]: UserProfile._meta.permissions
+Out[15]:
+(('repository_backend_page', '可访问所有 app 下的 所有表'),
+ ('repository_app_page', '可访问一个 app 下的所有表'),
+ ('repository_table_obj_list', '可访问一张表中的 所有 数据记录'),
+ ('repository_table_obj_add', '可添加表记录数据'),
+ ('repository_table_obj_change', '可对表记录数据进行修改'),
+ ('repository_table_obj_delete', '可删除表记录数据'))
+
+
+
+

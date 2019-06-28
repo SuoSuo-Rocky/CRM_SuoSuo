@@ -1,0 +1,29 @@
+{% extends 'index.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="/static/css/login/signin.css" >
+
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+
+          <form class="form-signin"  method="post">
+              {%  csrf_token %}
+            <h2 class="form-signin-heading">SuoSuo PerfectCRM</h2>
+            <label for="inputName" class="sr-only">UserName</label>
+            <input type="text" name="username" id="UserName" class="form-control" placeholder="UserName" required autofocus>
+            <label for="inputPassword" class="sr-only">Password</label>
+            <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+              <span style="color: red">{{ error_msg }}</span>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" value="remember-me"> Remember me
+              </label>
+            </div>
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+          </form>
+
+    </div> <!-- /container -->
+
+{% endblock %}

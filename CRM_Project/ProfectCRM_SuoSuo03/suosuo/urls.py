@@ -1,0 +1,31 @@
+"""suosuo URL Configuration
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/2.1/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+"""
+
+from django.contrib import admin
+from django.urls import path
+from django.conf.urls import url, include
+from suosuo import views
+
+
+urlpatterns = [
+    url(r'^popup$',views.popup, name="popup"),
+    url(r'^tab$', views.tab, name='tab'),
+    path('admin/', admin.site.urls),
+    path('kingadmin/', include('kingAdmin.urls'),),
+    path('shiwei/', include('shiwei.urls')),
+    path('login', views.acc_login.as_view()),  # 每次写 CBV 时 ， 就忘了 调用 as_view()
+    url(r'^logout$', views.acc_logout, name='logout'),
+]

@@ -1,0 +1,48 @@
+{% extends 'index.html' %}
+
+{% load enrollment_tags %}
+{% block right-content-container%}
+    <h2 class="page-header">学员报名: <span style="color: red;">{{ error_message }} </span></h2>
+
+
+    <form class="form-horizontal" method="post" >
+        {% csrf_token %}
+      <div class="form-group">
+        <label for="inputEmail3" class="col-sm-2 control-label">客户</label>
+        <div class="col-sm-7">
+            <select name="customer" id="" class="form-control">
+                {% for customer in customers %}
+                    <option value="{{ customer.id }}">{{ customer }}</option>
+                {% endfor %}
+            </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="inputPassword3" class="col-sm-2 control-label">报名班级</label>
+        <div class="col-sm-7">
+              <select name="banji" id="" class="form-control">
+                    {% for class in class_lists %}
+                        <option value="{{ class.id }}">{{ class}}</option>
+                    {% endfor %}
+              </select>
+        </div>
+      </div>
+
+        {% if enrollment_obj %}
+{#            <p> 请将此报名链接复制并发送给学员填写{{ enrollment_link }}</p>#}
+            <p> 请将此报名链接复制并发送给学员填写{% get_path  enrollment_obj %}</p>
+        {% endif %}
+
+      <div class="form-group" style="margin-top: 66px;">
+        <div class="col-sm-offset-5 col-sm-2">
+          <button type="submit" class="btn btn-info">下一步</button>
+        </div>
+      </div>
+
+    </form>
+
+
+
+
+
+{% endblock %}]

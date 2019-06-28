@@ -1,0 +1,112 @@
+{% extends 'index.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="/static/plugins/dropzone/dropzone.css">
+{% endblock %}
+
+{% block body %}
+    <!--  学员 提交 基本 报名 信息 成功   -->
+    <div class="container">
+        <div class="panel panel-info">
+              <div class="panel-heading">
+                  <h3 class="panel-title">学员在线报名|查看合同</h3>
+              </div>
+              <div class="panel-body">
+{#              onsubmit="return beforeSubmit(this)"#}
+                  <form  method="post" action="/shiwei/wanganshi">
+                      <pre style="height: 500px;">{{ enrollment_obj.class_grade.contract_template.content }}</pre>
+                      <input type="checkbox" name="contact" > 打死我都无条件的同意
+                      <div class="panel-success">
+                          <h2 class="panel-title">上传证件信息</h2>
+                      </div>
+                      <!--  文件上传 dropzone  -->
+                      <ol style="padding-left: 20px;" id="uploaded_file">
+                          {% if upload_files %}
+                              <span>你已上传文件:</span>
+                              {% for file in upload_files %}
+                                  <li>{{ forloop.counter }}、{{ file }}</li>
+                              {% endfor %}
+                          {% endif %}
+                      </ol>
+{#                     <div id="dropzone">#}
+{#                         <form action="{% url 'contract_upload' enrollment_id %}" class="dropzone needsclick dz-clickable" id="myAwesomeDropzone" method="post">#}
+{#                             {% csrf_token %}#}
+{#                              <div class="dz-message needsclick">#}
+{#                                  <div class="dz-icon icon-wrap icon-circle icon-wrap-md">#}
+{#                                        <i class="fa fa-cloud-upload fa-3x"></i>#}
+{#                                    </div>#}
+{#                                    <div>#}
+{#                                        <p class="dz-text">Drop  OR  Click me</p>#}
+{#                                        <p class="text-muted">最多可上传 2 个</p>#}
+{#                                    </div>#}
+{#                              </div>#}
+{#                        </form>#}
+{#                     </div>#}
+    {#                   <div class="col-md-offset-5 col-md-5" >#}
+    {#                        <input type="submit" value="提交" class="btn btn-success btn-lg">#}
+    {#                   </div>#}
+    {#                  </form>#}
+                        <div class="col-md-offset-5 col-md-5" >
+                            <input type="submit" value="提交" class="btn btn-success btn-lg">
+                        </div>
+                  </form>
+             </div>
+        </div>
+    </div>
+
+
+     <script>
+        function beforeSubmit(ele) {
+
+            {#if($("#uploaded_file").children().length == 0){#}
+            {#    alert('请上传证件信息');#}
+            {#    return false#}
+            {#}#}
+            {#if(!$('input[name="contact"]').prop("checked")){#}
+            {#    alert('必须勾选 不退费协议');#}
+            {#    return false#}
+            {#}#}
+
+        }
+
+        Dropzone.options.myAwesomeDropzone = {
+            {#url: "{% url 'enrollment_fileupload' enrollment_id %}",#}
+            paramName: "file", // The name that will be used to transfer the file
+            maxFilesize: 2, // MB
+            maxFiles: 2,
+            addRemoveLinks:true,
+            uploadMultiple:true,
+            accept: function(file, done) {
+                if (file.name.endsWith('jpg')) {
+                  alert('只可上传 图片文件');
+                    done('文件为上传');
+                }
+                else { done(); }
+              }
+        };
+
+        $(function() {
+          // Now that the DOM is fully loaded, create the dropzone, and setup the
+          // event listeners
+          // Prevent Dropzone from auto discovering this element:
+          Dropzone.options.myAwesomeDropzone = false;
+          var myDropzone = new Dropzone("#myAwesomeDropzone");
+          myDropzone.on("success", function(file,response) {
+            /* Maybe display some more file information on your page */
+             console.log("completet", file, response);
+             var response = JSON.parse(response);
+             if (!response.status){
+                 alert(response.err_msg);
+             }else {
+                 $("#uploaded_files").append("<li>"+ file.name +"</li>");
+             }
+          });
+        })
+
+    </script>
+{% endblock %}
+
+
+{% block js %}
+     <script src="/static/plugins/dropzone/dropzone.js"></script>
+{% endblock %}
