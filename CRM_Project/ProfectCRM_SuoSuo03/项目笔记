@@ -1,7 +1,6 @@
 
-# 林海峰   本项目的 Github 的地址
-https://github.com/triaquae/PerfectCRM
-
+登录账号: shiwei@qq.com
+密码: shiwei666666
 
 一对一: 反向直接小写表名：
                {{ request.user.userprofile.role.all }}
